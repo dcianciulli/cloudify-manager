@@ -43,8 +43,8 @@ class AuthenticationTest(TestAuthenticationBase):
         self._assert_empty_token_fails()
 
     def _assert_valid_credentials_authenticate(self):
-        self._assert_authorized(username=utils.ADMIN_USERNAME,
-                                password=utils.ADMIN_PASSWORD)
+        self._assert_authorized(username=utils.get_username(),
+                                password=utils.get_password())
 
     def _assert_invalid_credentials_fails(self):
         self._assert_unauthorized(username='wrong_username',

@@ -84,9 +84,10 @@ class TestClient(FlaskClient):
     """
     def open(self, *args, **kwargs):
         kwargs = kwargs or {}
+        admin = get_admin_user()[0]
         kwargs['headers'] = kwargs.get('headers') or {}
         kwargs['headers'].update(utils.create_auth_header(
-            username='admin', password='admin')
+            username=admin['username'], password=admin['password'])
         )
         return super(TestClient, self).open(*args, **kwargs)
 

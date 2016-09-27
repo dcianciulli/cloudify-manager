@@ -14,7 +14,7 @@
 #    * limitations under the License.
 
 from .test_base import TestAuthenticationBase
-from integration_tests.postgresql import user_datastore
+from integration_tests.framework.postgresql import user_datastore
 
 # See here for explanation on how to make AD allow simple passwords
 # http://serverfault.com/questions/19611/disable-password-complexity-rule-in-active-directory#19613 # NOQA
