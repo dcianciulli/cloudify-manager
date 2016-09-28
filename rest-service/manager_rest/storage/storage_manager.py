@@ -137,6 +137,10 @@ class SQLStorageManager(object):
             else:
                 query = query.filter_by(**{key: value})
 
+        if model_class is not Tenant:
+            tenant_id = _get_current_tenant_id()
+            query.filter(model_class.tenant_relationship.has(tenant_id=tenant_id))
+
         return query
 
     def _get_query(self,
