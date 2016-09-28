@@ -20,7 +20,8 @@ from flask_security.utils import md5
 
 from .ldap import get_ldappy
 from .security_models import user_datastore
-from .user_handler import unauthorized_user_handler
+from .user_handler import unauthorized_user_handler, add_user_to_tenant
+from manager_rest.config import instance
 
 
 Authorization = namedtuple('Authorization', 'username password')
@@ -104,7 +105,7 @@ class Authentication(object):
         first_name = ldap_user.get('first_name', [''])[0]
         last_name = ldap_user.get('last_name', [''])[0]
 
-        return user_datastore.create_user(
+        user_datastore.create_user(
             username=username,
             password=password,
             email=email,
@@ -112,6 +113,7 @@ class Authentication(object):
             last_name=last_name,
             created_at=datetime.now()
         )
+        return add_user_to_tenant(username, instance.default_tenant_name)
 
     @staticmethod
     def _basic_http_authenticate(user, hashed_pass):

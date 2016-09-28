@@ -28,6 +28,7 @@ from manager_rest.storage.models import (Blueprint,
                                          Execution,
                                          Node,
                                          NodeInstance,
+                                         Tenant,
                                          ProviderContext,
                                          Plugin)
 
@@ -216,6 +217,12 @@ class SQLStorageManager(object):
         results, total, size, offset = self._paginate(query, pagination)
         pagination = {'total': total, 'size': size, 'offset': offset}
 
+        # filter by user tenants
+        # in list tenants api - show all relevant tenants
+        # WHERE xxx.tenant_id in user_tenants
+        # otherwise - show all results for current query tenant
+        # WHERE xxx.tenant_id = current_tenant
+
         return ListResult(items=results, metadata={'pagination': pagination})
 
     @staticmethod
@@ -369,6 +376,16 @@ class SQLStorageManager(object):
         blueprint = self._get_by_id(Blueprint, blueprint_id, include)
         return ListResult(items=blueprint.deployments, metadata={})
 
+    def list_tenants(self, include=None, filters=None, pagination=None,
+                     sort=None):
+        return self._list_results(
+            Tenant,
+            include=include,
+            filters=filters,
+            pagination=pagination,
+            sort=sort
+        )
+
     def get_node_instance(self, node_instance_id, include=None, locking=False):
         return self._get_by_id(
             NodeInstance,
@@ -379,6 +396,13 @@ class SQLStorageManager(object):
 
     def get_provider_context(self, include=None):
         return self._get_by_id(ProviderContext, PROVIDER_CONTEXT_ID, include)
+
+    def get_tenant(self, tenant_id, include=None):
+        return self._get_by_id(Tenant, tenant_id, include=include)
+
+    def get_tenant_by_name(self, tenant_name):
+        filters = {'name': tenant_name}
+        return self._get_by_id(Tenant, tenant_name, filters=filters)
 
     def get_deployment_modification(self, modification_id, include=None):
         return self._get_by_id(
@@ -424,6 +448,9 @@ class SQLStorageManager(object):
 
     def put_plugin(self, plugin):
         return self._create_model(Plugin, plugin, add_tenant=True)
+
+    def put_tenant(self, tenant):
+        return self._create_model(Tenant, tenant)
 
     def put_node(self, node):
         # Need to add the storage id separately - only used for relations

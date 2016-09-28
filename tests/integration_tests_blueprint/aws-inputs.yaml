@@ -1,6 +1,6 @@
 # Credentials and identification in order to connect to ec2
-aws_access_key_id: ''
-aws_secret_access_key: ''
+aws_access_key_id: 'AKIAIC4KBCZLAGTQTW6Q'
+aws_secret_access_key: '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'
 ec2_region_name: 'eu-central-1'
 
 image_id: 'ami-26c43149'
@@ -13,3 +13,6 @@ server_name: 'docl-machine'
 ssh_user: ubuntu
 ssh_port: 22
 instance_type: m3.large
+
+
+

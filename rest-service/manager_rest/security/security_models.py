@@ -25,6 +25,13 @@ roles_users_table = db.Table(
 )
 
 
+tenants_users_table = db.Table(
+    'tenants_users',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('tenant_id', db.Integer, db.ForeignKey('tenants.id'))
+)
+
+
 class User(SerializableBase, UserMixin):
     __tablename__ = 'users'
 
@@ -41,6 +48,12 @@ class User(SerializableBase, UserMixin):
     roles = db.relationship(
         'Role',
         secondary=roles_users_table,
+        backref=db.backref('users', lazy='dynamic')
+    )
+
+    tenants = db.relationship(
+        'Tenant',
+        secondary=tenants_users_table,
         backref=db.backref('users', lazy='dynamic')
     )
 
