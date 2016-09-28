@@ -553,7 +553,7 @@ def get_storage_manager():
 
 
 def _get_current_tenant_id():
-    return current_app.config.get('tenant')
+    return current_app.config.get('tenant').id
 
 
 class ListResult(object):
