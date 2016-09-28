@@ -137,7 +137,7 @@ def _detect_debug_environment():
             if debug_config.get('is_debug_on'):
                 import pydevd
                 pydevd.settrace(
-                    '192.168.11.91', port=53100, stdoutToServer=True,
+                    debug_config['host'], port=53100, stdoutToServer=True,
                     stderrToServer=True, suspend=False)
     except BaseException, e:
         raise Exception('Failed to connect to debug server, {0}: {1}'.

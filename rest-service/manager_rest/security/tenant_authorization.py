@@ -1,17 +1,19 @@
 from flask import current_app
 
 from manager_rest.config import instance
-from manager_rest.constants import CLOUDIFY_TENANT_HEADER
 from manager_rest.manager_exceptions import NotFoundError
 from manager_rest.storage import get_storage_manager
+from manager_rest.constants import CLOUDIFY_TENANT_HEADER, ADMIN_ROLE_NAME
 
 from .user_handler import unauthorized_user_handler
+from .security_models import user_datastore
 
 
 class TenantAuthorization(object):
     def authorize(self, user, request):
         logger = current_app.logger
 
+        admin_role = user_datastore.find_role(ADMIN_ROLE_NAME)
         tenant_name = request.headers.get(
             CLOUDIFY_TENANT_HEADER,
             instance.default_tenant_name
@@ -25,7 +27,7 @@ class TenantAuthorization(object):
             raise unauthorized_user_handler(
                 'Provided tenant name {0} unknown'.format(tenant_name)
             )
-        if tenant not in user.tenants:
+        if tenant not in user.tenants and admin_role not in user.roles:
             raise unauthorized_user_handler(
                 'User {0} is not associated with tenant {1}'.format(
                     user.username,

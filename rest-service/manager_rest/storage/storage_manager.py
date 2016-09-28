@@ -147,7 +147,6 @@ class SQLStorageManager(object):
                     Deployment.blueprint.has(tenant_id=tenant_id)
                 )
 
-
         return query
 
     def _get_query(self,
