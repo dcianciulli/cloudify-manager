@@ -21,7 +21,6 @@ from flask_restful_swagger import swagger
 from manager_rest import responses_v3
 from manager_rest.storage import models
 from manager_rest.security import SecuredResource
-from manager_rest.security.user_handler import add_user_to_tenant
 from manager_rest.storage import get_storage_manager
 from manager_rest.resources import (marshal_with,
                                     exceptions_handled)
@@ -30,6 +29,8 @@ from manager_rest.resources_v2 import (create_filters,
                                        sortable,
                                        verify_json_content_type,
                                        verify_parameter_in_request_body)
+from manager_rest.security.user_handler import (add_user_to_tenant,
+                                                remove_user_from_tenant)
 
 
 class Tenants(SecuredResource):
@@ -73,6 +74,27 @@ class Tenants(SecuredResource):
         verify_parameter_in_request_body('tenant_name', request_json)
 
         return add_user_to_tenant(
+            request_json['username'],
+            request_json['tenant_name']
+        )
+
+    @swagger.operation(
+        responseClass=responses_v3.Tenant,
+        nickname='removeUser',
+        notes='Remove a user from a tenant.'
+    )
+    @exceptions_handled
+    @marshal_with(responses_v3.User)
+    def delete(self):
+        """
+        Add a user to a tenant
+        """
+        verify_json_content_type()
+        request_json = request.json
+        verify_parameter_in_request_body('username', request_json)
+        verify_parameter_in_request_body('tenant_name', request_json)
+
+        return remove_user_from_tenant(
             request_json['username'],
             request_json['tenant_name']
         )

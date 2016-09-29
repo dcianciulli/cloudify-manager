@@ -26,16 +26,7 @@ from .security_models import user_datastore
 
 
 def add_user_to_tenant(username, tenant_name):
-    user = user_datastore.get_user(username)
-    if not user:
-        raise NotFoundError(
-            'Requested username `{0}` not found'.format(username)
-        )
-    tenant = get_storage_manager().get_tenant_by_name(tenant_name)
-    if not tenant:
-        raise NotFoundError(
-            'Requested tenant `{0}` not found'.format(tenant_name)
-        )
+    user, tenant = _get_user_and_tenant(username, tenant_name)
     if tenant in user.tenants:
         raise ConflictError(
             'User `{}` is already associated to tenant `{}`'.format(
@@ -47,6 +38,38 @@ def add_user_to_tenant(username, tenant_name):
     user_datastore.commit()
     return user
 
+
+def remove_user_from_tenant(username, tenant_name):
+    user, tenant = _get_user_and_tenant(username, tenant_name)
+    if tenant not in user.tenants:
+        raise NotFoundError(
+            'User `{}` is not associated with tenant `{}`'.format(
+                username, tenant_name
+            )
+        )
+    user.tenants.remove(tenant)
+    user_datastore.put(user)
+    user_datastore.commit()
+    return user
+
+
+def _get_user_and_tenant(username, tenant_name):
+    """Return a user object and a tenant object retrieved from their names
+
+    :param username:
+    :param tenant_name:
+    """
+    user = user_datastore.get_user(username)
+    if not user:
+        raise NotFoundError(
+            'Requested username `{0}` not found'.format(username)
+        )
+    tenant = get_storage_manager().get_tenant_by_name(tenant_name)
+    if not tenant:
+        raise NotFoundError(
+            'Requested tenant `{0}` not found'.format(tenant_name)
+        )
+    return user, tenant
 
 def unauthorized_user_handler(extra_info=None):
     error = 'User unauthorized'
