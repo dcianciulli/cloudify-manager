@@ -140,9 +140,13 @@ class SQLStorageManager(object):
             # directly via a relationship with the tenants table, or via an
             # ancestor who has such a relationship)
             tenant_id = _get_current_tenant_id()
-            query = query.filter(
-                model_class.tenant_relationship.has(tenant_id=tenant_id)
-            )
+            if hasattr(model_class, 'tenant_id'):
+                query = query.filter_by(tenant_id=tenant_id)
+            else:
+                query = query.filter(
+                    Deployment.blueprint.has(tenant_id=tenant_id)
+                )
+
 
         return query
 

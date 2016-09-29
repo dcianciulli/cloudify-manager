@@ -133,10 +133,6 @@ class SerializableBase(db.Model):
         fields = [f for f in fields if f not in cls._private_fields]
         return fields
 
-    @classproperty
-    def tenant_relationship(cls):
-        return cls
-
     def __str__(self):
         return '<{0} id=`{1}`>'.format(self.__class__.__name__, self.id)
 
@@ -226,10 +222,6 @@ class Deployment(SerializableBase):
     def tenant(self):
         return self.blueprint.tenant
 
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.blueprint
-
 
 class Execution(SerializableBase):
     __tablename__ = 'executions'
@@ -316,10 +308,6 @@ class DeploymentUpdate(SerializableBase):
     def tenant(self):
         return self.deployment.tenant
 
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.deployment.tenant_relationship
-
 
 class DeploymentUpdateStep(SerializableBase):
     __tablename__ = 'deployment_update_steps'
@@ -340,10 +328,6 @@ class DeploymentUpdateStep(SerializableBase):
     @property
     def tenant(self):
         return self.deployment_update.tenant
-
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.deployment_update.tenant_relationship
 
 
 class DeploymentModification(SerializableBase):
@@ -375,10 +359,6 @@ class DeploymentModification(SerializableBase):
     @property
     def tenant(self):
         return self.deployment.tenant
-
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.deployment_update.tenant_relationship
 
 
 class Node(SerializableBase):
@@ -423,10 +403,6 @@ class Node(SerializableBase):
     def tenant(self):
         return self.deployment.tenant
 
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.deployment_update.tenant_relationship
-
 
 class NodeInstance(SerializableBase):
     __tablename__ = 'node_instances'
@@ -463,10 +439,6 @@ class NodeInstance(SerializableBase):
     @property
     def tenant(self):
         return self.deployment.tenant
-
-    @classproperty
-    def tenant_relationship(cls):
-        return cls.deployment_update.tenant_relationship
 
 
 class ProviderContext(SerializableBase):
