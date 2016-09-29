@@ -135,7 +135,7 @@ class SerializableBase(db.Model):
 
     @classproperty
     def tenant_relationship(cls):
-        return cls.tenant
+        return cls
 
     def __str__(self):
         return '<{0} id=`{1}`>'.format(self.__class__.__name__, self.id)

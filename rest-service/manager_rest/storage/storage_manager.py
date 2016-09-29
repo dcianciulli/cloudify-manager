@@ -123,23 +123,26 @@ class SQLStorageManager(object):
         of such values)
         :return: An SQLAlchemy AppenderQuery object
         """
-        # We need to differentiate between different kinds of filers:
-        # if the value of the filter is a list, we'll use SQLAlchemy's `in`
-        # operator, to check against multiple values. Otherwise, we use a
-        # simple keyword filter
-        if not filters:
-            return query
-
-        for key, value in filters.iteritems():
-            if isinstance(value, (list, tuple)):
-                column = getattr(model_class, key)
-                query = query.filter(column.in_(value))
-            else:
-                query = query.filter_by(**{key: value})
+        if filters:
+            # We need to differentiate between different kinds of filers:
+            # if the value of the filter is a list, we'll use SQLAlchemy's `in`
+            # operator, to check against multiple values. Otherwise, we use a
+            # simple keyword filter
+            for key, value in filters.iteritems():
+                if isinstance(value, (list, tuple)):
+                    column = getattr(model_class, key)
+                    query = query.filter(column.in_(value))
+                else:
+                    query = query.filter_by(**{key: value})
 
         if model_class is not Tenant:
+            # Filter by the tenant ID associated with that model class (either
+            # directly via a relationship with the tenants table, or via an
+            # ancestor who has such a relationship)
             tenant_id = _get_current_tenant_id()
-            query.filter(model_class.tenant_relationship.has(tenant_id=tenant_id))
+            query = query.filter(
+                model_class.tenant_relationship.has(tenant_id=tenant_id)
+            )
 
         return query
 
