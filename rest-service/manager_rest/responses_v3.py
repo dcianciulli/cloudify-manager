@@ -30,6 +30,17 @@ class Tenant(object):
 
 
 @swagger.model
+class Group(object):
+
+    resource_fields = {
+        'name': fields.String,
+    }
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name')
+
+
+@swagger.model
 class User(object):
 
     resource_fields = {

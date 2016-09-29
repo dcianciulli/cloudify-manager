@@ -22,54 +22,134 @@ from manager_rest.manager_exceptions import (UnauthorizedError,
                                              NotFoundError,
                                              ConflictError)
 
-from .security_models import user_datastore
+from .security_models import user_datastore, User
 
 
-def add_user_to_tenant(username, tenant_name):
-    user, tenant = _get_user_and_tenant(username, tenant_name)
-    if tenant in user.tenants:
-        raise ConflictError(
-            'User `{}` is already associated to tenant `{}`'.format(
-                username, tenant_name
+class TenantManager(object):
+    def __init__(self):
+        self.sm = get_storage_manager()
+
+    def add_user_to_tenant(self, username, tenant_name):
+        user = self._get_user_by_name(username)
+        tenant = self._get_tenant_by_name(tenant_name)
+
+        if tenant in user.tenants:
+            raise ConflictError(
+                'User `{0}` is already associated to tenant `{1}`'.format(
+                    username, tenant_name
+                )
             )
-        )
-    user.tenants.append(tenant)
-    user_datastore.put(user)
-    user_datastore.commit()
-    return user
+        user.tenants.append(tenant)
+        user_datastore.put(user)
+        user_datastore.commit()
+        return user
 
+    def remove_user_from_tenant(self, username, tenant_name):
+        # user = self._get_user_by_name(username)
+        user = User.query.filter_by(username=username).first()
+        tenant = self._get_tenant_by_name(tenant_name)
 
-def remove_user_from_tenant(username, tenant_name):
-    user, tenant = _get_user_and_tenant(username, tenant_name)
-    if tenant not in user.tenants:
-        raise NotFoundError(
-            'User `{}` is not associated with tenant `{}`'.format(
-                username, tenant_name
+        if tenant not in user.tenants:
+            raise NotFoundError(
+                'User `{0}` is not associated with tenant `{1}`'.format(
+                    username, tenant_name
+                )
             )
-        )
-    user.tenants.remove(tenant)
-    user_datastore.put(user)
-    user_datastore.commit()
-    return user
+        user.tenants.remove(tenant)
+        user_datastore.put(user)
+        user_datastore.commit()
+        return user
 
+    def add_group_to_tenant(self, group_name, tenant_name):
+        group = self._get_group_by_name(group_name)
+        tenant = self._get_tenant_by_name(tenant_name)
+        if tenant in group.tenants:
+            raise ConflictError(
+                'Group `{0}` is already associated to tenant `{1}`'.format(
+                    group_name, tenant_name
+                )
+            )
+        group.tenants.append(tenant)
+        self.sm.update_entity(group)
+        return group
 
-def _get_user_and_tenant(username, tenant_name):
-    """Return a user object and a tenant object retrieved from their names
+    def remove_group_from_tenant(self, group_name, tenant_name):
+        group = self._get_group_by_name(group_name)
+        tenant = self._get_tenant_by_name(tenant_name)
+        if tenant not in group.tenants:
+            raise NotFoundError(
+                'User `{0}` is not associated with tenant `{1}`'.format(
+                    group_name, tenant_name
+                )
+            )
+        group.tenants.remove(tenant)
+        self.sm.update_entity(group)
+        return group
 
-    :param username:
-    :param tenant_name:
-    """
-    user = user_datastore.get_user(username)
-    if not user:
-        raise NotFoundError(
-            'Requested username `{0}` not found'.format(username)
-        )
-    tenant = get_storage_manager().get_tenant_by_name(tenant_name)
-    if not tenant:
-        raise NotFoundError(
-            'Requested tenant `{0}` not found'.format(tenant_name)
-        )
-    return user, tenant
+    def add_user_to_group(self, username, group_name):
+        user = self._get_user_by_name(username)
+        group = self._get_group_by_name(group_name)
+        if group in user.groups:
+            raise ConflictError(
+                'User `{0}` is already associated to group `{1}`'.format(
+                    username, group_name
+                )
+            )
+        user.groups.append(group)
+        user_datastore.put(user)
+        user_datastore.commit()
+        return user
+
+    def remove_user_from_group(self, username, group_name):
+        user = self._get_user_by_name(username)
+        group = self._get_group_by_name(group_name)
+        if group not in user.groups:
+            raise NotFoundError(
+                'User `{0}` is not associated with group `{1}`'.format(
+                    username, group_name
+                )
+            )
+        user.groups.remove(group)
+        user_datastore.put(user)
+        user_datastore.commit()
+        return user
+
+    def _get_user_by_name(self, username):
+        """Return a user object and a tenant object retrieved from their names
+
+        :param username:
+        """
+        user = user_datastore.get_user(username)
+        if not user:
+            raise NotFoundError(
+                'Requested username `{0}` not found'.format(username)
+            )
+        return user
+
+    def _get_tenant_by_name(self, tenant_name):
+        """Return a tenant object by name
+
+        :param tenant_name:
+        """
+        tenant = self.sm.get_tenant_by_name(tenant_name)
+        if not tenant:
+            raise NotFoundError(
+                'Requested tenant `{0}` not found'.format(tenant_name)
+            )
+        return tenant
+
+    def _get_group_by_name(self, group_name):
+        """Return a group object by name
+
+        :param group_name:
+        """
+        group = self.sm.get_group_by_name(group_name)
+        if not group:
+            raise NotFoundError(
+                'Requested group `{0}` not found'.format(group_name)
+            )
+        return group
+
 
 def unauthorized_user_handler(extra_info=None):
     error = 'User unauthorized'
@@ -137,11 +217,14 @@ def get_user_and_hashed_pass(request):
             return None, None
         user, hashed_pass = _get_user_from_token(token)
 
-    # if user:
-    #     db = current_app.extensions['sqlalchemy'].db
-    #     # This hack makes sure the roles are actually loaded from the DB
-    #     _ = user.roles  # NOQA
-    #     _ = user.tenants  # NOQA
-    #     # This is necessary to allow access after the SQLA session has closed
-    #     db.make_transient(user)
     return user, hashed_pass
+
+
+def get_tenant_manager():
+    """Get the current Flask app's tenant manager, create if necessary
+    """
+    manager = current_app.config.get('tenant_manager')
+    if not manager:
+        current_app.config['tenant_manager'] = TenantManager()
+        manager = current_app.config.get('tenant_manager')
+    return manager

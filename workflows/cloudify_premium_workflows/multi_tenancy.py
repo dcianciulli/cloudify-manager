@@ -13,14 +13,8 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-
-import json
-
-import utils
-
 from cloudify.workflows import ctx
 from cloudify.decorators import workflow
-
 
 
 @workflow(system_wide=True)

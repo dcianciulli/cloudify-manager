@@ -143,11 +143,31 @@ class SerializableBase(db.Model):
         return str(self)
 
 
+tenants_groups_table = db.Table(
+    'tenants_groups',
+    db.Column('group_id', db.Integer, db.ForeignKey('groups.id')),
+    db.Column('tenant_id', db.Integer, db.ForeignKey('tenants.id'))
+)
+
+
 class Tenant(SerializableBase):
     __tablename__ = 'tenants'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, unique=True, index=True)
+
+
+class Group(SerializableBase):
+    __tablename__ = 'groups'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, unique=True, nullable=False, index=True)
+
+    tenants = db.relationship(
+        'Tenant',
+        secondary=tenants_groups_table,
+        backref=db.backref('groups', lazy='dynamic')
+    )
 
 
 class Blueprint(SerializableBase):

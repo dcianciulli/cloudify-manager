@@ -65,6 +65,11 @@ def setup_resources(api):
         'DeploymentUpdates': 'deployment-updates',
         'Tenants': 'tenants',
         'TenantsId': 'tenants/<string:tenant_name>',
+        'TenantUsers': 'tenants/users',
+        'TenantGroups': 'tenants/user-groups',
+        'UserGroups': 'user-groups',
+        'UserGroupsId': 'user-groups/<string:group_name>',
+        'UserGroupsUsers': 'user-groups/users',
     }
 
     for resource, endpoint_suffix in resources_endpoints.iteritems():

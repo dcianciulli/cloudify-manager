@@ -15,6 +15,7 @@
 
 # Setting NOQA to avoid flake errors - these are convenience imports
 from .user_handler import user_loader           # NOQA
+from .user_handler import get_tenant_manager    # NOQA
 from .authentication import configure_ldap      # NOQA
 from .security_models import user_datastore     # NOQA
 from .secured_resource import SecuredResource   # NOQA

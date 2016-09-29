@@ -30,7 +30,8 @@ from manager_rest.storage.models import (Blueprint,
                                          NodeInstance,
                                          Tenant,
                                          ProviderContext,
-                                         Plugin)
+                                         Plugin,
+                                         Group)
 
 PROVIDER_CONTEXT_ID = 'CONTEXT'
 
@@ -135,7 +136,7 @@ class SQLStorageManager(object):
                 else:
                     query = query.filter_by(**{key: value})
 
-        if model_class is not Tenant:
+        if model_class not in (Tenant, Group):
             # Filter by the tenant ID associated with that model class (either
             # directly via a relationship with the tenants table, or via an
             # ancestor who has such a relationship)
@@ -382,14 +383,20 @@ class SQLStorageManager(object):
             sort=sort
         )
 
-    def list_blueprint_deployments(self, blueprint_id, include=None):
-        blueprint = self._get_by_id(Blueprint, blueprint_id, include)
-        return ListResult(items=blueprint.deployments, metadata={})
-
     def list_tenants(self, include=None, filters=None, pagination=None,
                      sort=None):
         return self._list_results(
             Tenant,
+            include=include,
+            filters=filters,
+            pagination=pagination,
+            sort=sort
+        )
+
+    def list_groups(self, include=None, filters=None, pagination=None,
+                    sort=None):
+        return self._list_results(
+            Group,
             include=include,
             filters=filters,
             pagination=pagination,
@@ -410,9 +417,16 @@ class SQLStorageManager(object):
     def get_tenant(self, tenant_id, include=None):
         return self._get_by_id(Tenant, tenant_id, include=include)
 
+    def get_group(self, group_id, include=None):
+        return self._get_by_id(Group, group_id, include=include)
+
     def get_tenant_by_name(self, tenant_name):
         filters = {'name': tenant_name}
         return self._get_by_id(Tenant, tenant_name, filters=filters)
+
+    def get_group_by_name(self, group_name):
+        filters = {'name': group_name}
+        return self._get_by_id(Group, group_name, filters=filters)
 
     def get_deployment_modification(self, modification_id, include=None):
         return self._get_by_id(
@@ -461,6 +475,9 @@ class SQLStorageManager(object):
 
     def put_tenant(self, tenant):
         return self._create_model(Tenant, tenant)
+
+    def put_group(self, group):
+        return self._create_model(Group, group)
 
     def put_node(self, node):
         # Need to add the storage id separately - only used for relations

@@ -27,7 +27,8 @@ class TenantAuthorization(object):
             raise unauthorized_user_handler(
                 'Provided tenant name {0} unknown'.format(tenant_name)
             )
-        if tenant not in user.tenants and admin_role not in user.roles:
+        if tenant not in user.get_all_tenants() \
+                and admin_role not in user.roles:
             raise unauthorized_user_handler(
                 'User {0} is not associated with tenant {1}'.format(
                     user.username,

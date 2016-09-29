@@ -20,7 +20,7 @@ from flask_security.utils import md5
 
 from .ldap import get_ldappy
 from .security_models import user_datastore
-from .user_handler import unauthorized_user_handler, add_user_to_tenant
+from .user_handler import unauthorized_user_handler, get_tenant_manager
 from manager_rest.config import instance
 
 
@@ -113,7 +113,9 @@ class Authentication(object):
             last_name=last_name,
             created_at=datetime.now()
         )
-        return add_user_to_tenant(username, instance.default_tenant_name)
+        return get_tenant_manager().add_user_to_tenant(
+            username, instance.default_tenant_name
+        )
 
     @staticmethod
     def _basic_http_authenticate(user, hashed_pass):
