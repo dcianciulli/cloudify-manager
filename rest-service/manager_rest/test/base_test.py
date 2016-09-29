@@ -181,7 +181,7 @@ class BaseServerTestCase(unittest.TestCase):
         db.session.add(t)
         db.session.commit()
 
-        app.config['tenant'] = t.id
+        app.config['tenant'] = t
 
     @staticmethod
     def _get_app(flask_app):
