@@ -13,6 +13,8 @@ class TenantAuthorization(object):
     def authorize(self, user, request):
         logger = current_app.logger
 
+        logger.debug('Tenant authorization for user {0}'.format(user))
+
         admin_role = user_datastore.find_role(ADMIN_ROLE_NAME)
         tenant_name = request.headers.get(
             CLOUDIFY_TENANT_HEADER,
@@ -25,7 +27,7 @@ class TenantAuthorization(object):
             tenant = get_storage_manager().get_tenant_by_name(tenant_name)
         except NotFoundError:
             raise unauthorized_user_handler(
-                'Provided tenant name {0} unknown'.format(tenant_name)
+                'Provided tenant name unknown: {0}'.format(tenant_name)
             )
         if tenant not in user.get_all_tenants() \
                 and admin_role not in user.roles:

@@ -16,6 +16,7 @@
 from datetime import datetime
 from collections import namedtuple
 
+from flask import current_app
 from flask_security.utils import md5
 
 from .ldap import get_ldappy
@@ -30,6 +31,7 @@ Authorization = namedtuple('Authorization', 'username password')
 class Authentication(object):
     def __init__(self):
         self._ldappy = None
+        self._logger = current_app.logger
 
     def authenticate(self, user, hashed_pass, auth):
         """Authenticate the user either against an LDAP server, or our
@@ -42,6 +44,8 @@ class Authentication(object):
         """
         if not user and not auth:
             unauthorized_user_handler('No authentication info provided')
+
+        self._logger.debug('Authenticating user {0}'.format(user))
 
         if not auth:
             # Creating this dummy auth object to have a simpler syntax
