@@ -31,7 +31,7 @@ def authenticate_and_authorize(func):
         user, hashed_pass = get_user_and_hashed_pass(request)
         user = authenticator.authenticate(user, hashed_pass, auth)
         role_authorizer.authorize(user, request)
-        tenant_authorizer.authorize(user, request)
+        # tenant_authorizer.authorize(user, request)
 
         # Passed authentication and authorization
         return func(*args, **kwargs)
